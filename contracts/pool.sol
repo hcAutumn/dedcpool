@@ -2,11 +2,7 @@
 contract owned {
     address public owner;
     
-
-    function owned() public {
-        owner = msg.sender;
-    }
-
+ 
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
@@ -31,8 +27,9 @@ contract DEDEPool is owned {
     
     mapping (address => nodepool) public nodepools;
  
- 
-    function DEDEPool() owned() public {}
+
+    /* Initializes contract with initial  the creator of the contract */
+    function DEDEPool() owned() public { }
  
  
    function JoinNode(address nodeadd,uint256 quota) onlyOwner  public  returns(bool)  {
@@ -44,4 +41,17 @@ contract DEDEPool is owned {
        return true;
   }
   
+     function ReleaseToNode(address nodeadd,uint256 release) onlyOwner  public  returns(bool)  {
+       if(nodepools[nodeadd].quota>0){
+           nodepools[nodeadd].release +=release;
+           nodepools[nodeadd].balance=nodepools[nodeadd].quota-nodepools[nodeadd].release;
+           return true;
+       }
+       return false;
+  }
+  
+  function GetNodeInfo(address nodeadd)  public 
+  returns(uint256,uint256,uint256){
+       return (nodepools[nodeadd].quota,nodepools[nodeadd].release,nodepools[nodeadd].balance);
+  }
 }
