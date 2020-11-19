@@ -1,8 +1,11 @@
+pragma solidity ^0.4.24;
 
 contract owned {
     address public owner;
     
- 
+     function owned() public {
+        owner = msg.sender;
+    }
     modifier onlyOwner {
         require(msg.sender == owner);
         _;
@@ -26,32 +29,51 @@ contract DEDEPool is owned {
     }
     
     mapping (address => nodepool) public nodepools;
- 
+    uint256 private quota=294117647; //10000 multiple
+    uint256 private release_quota=366600;//10000 multiple
 
     /* Initializes contract with initial  the creator of the contract */
     function DEDEPool() owned() public { }
  
  
-   function JoinNode(address nodeadd,uint256 quota) onlyOwner  public  returns(bool)  {
-       if(nodepools[nodeadd].quota==0){
+     function ReleaseToNode(address nodeadd,uint256 release) onlyOwner  public  returns(bool)  {
+      if(nodepools[nodeadd].quota==0){
            nodepools[nodeadd].quota=quota;
            nodepools[nodeadd].release=0;
-           nodepools[nodeadd].balance=0;
+           nodepools[nodeadd].balance=quota;
+          
        }
-       return true;
-  }
-  
-     function ReleaseToNode(address nodeadd,uint256 release) onlyOwner  public  returns(bool)  {
        if(nodepools[nodeadd].quota>0){
+           if((nodepools[nodeadd].release+release)>nodepools[nodeadd].quota){
+            nodepools[nodeadd].release=nodepools[nodeadd].quota;
+            nodepools[nodeadd].balance=0;
+           }
+           else{
            nodepools[nodeadd].release +=release;
            nodepools[nodeadd].balance=nodepools[nodeadd].quota-nodepools[nodeadd].release;
+           }
+           
            return true;
        }
        return false;
   }
   
-  function GetNodeInfo(address nodeadd)  public 
-  returns(uint256,uint256,uint256){
-       return (nodepools[nodeadd].quota,nodepools[nodeadd].release,nodepools[nodeadd].balance);
+       function GetPreRelease(address nodeadd) onlyOwner  public  returns(uint256)  {
+         if(nodepools[nodeadd].quota==0){
+           nodepools[nodeadd].quota=quota;
+           nodepools[nodeadd].release=0;
+           nodepools[nodeadd].balance=quota;
+          
+       }
+       if(nodepools[nodeadd].quota>0 && nodepools[nodeadd].balance>0){
+            if((nodepools[nodeadd].release+release_quota)>nodepools[nodeadd].quota){
+            return nodepools[nodeadd].quota-nodepools[nodeadd].release;
+           }
+           else{
+           return release_quota;
+           }
+       }
+       return 0;
   }
+  
 }
