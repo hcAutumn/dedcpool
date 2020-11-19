@@ -29,8 +29,8 @@ contract DEDEPool is owned {
     }
     
     mapping (address => nodepool) public nodepools;
-    uint256 private quota=294117647; //10000 multiple
-    uint256 private release_quota=366600;//10000 multiple
+    uint256 private quota=294117647; //10000 multiple ,Node total  quota  29411.7647
+    uint256 private release_quota=366600;//10000 multiple ,Each release  36.66
 
     /* Initializes contract with initial  the creator of the contract */
     function DEDEPool() owned() public { }
